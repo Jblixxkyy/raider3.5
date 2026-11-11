@@ -302,7 +302,7 @@ struct FGuid
 	int                                                C;                                                        // 0x0008(0x0004) (Edit, ZeroConstructor, SaveGame, IsPlainOldData)
 	int                                                D;                                                        // 0x000C(0x0004) (Edit, ZeroConstructor, SaveGame, IsPlainOldData)
 
-	bool operator==(const FGuid& Guid)
+	bool operator==(const FGuid& Guid) const
     {
 		return A == Guid.A && B == Guid.B && C == Guid.C && D == Guid.D;
 	}
@@ -324,7 +324,7 @@ struct FVector
 	float                                              Y;                                                        // 0x0004(0x0004) (Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData)
 	float                                              Z;                                                        // 0x0008(0x0004) (Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData)
 
-	bool operator==(const FVector& Vector)
+	bool operator==(const FVector& Vector) const
 	{
 		return X == Vector.X && Y == Vector.Y && Z == Vector.Z;
 	}
