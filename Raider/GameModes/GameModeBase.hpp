@@ -20,28 +20,37 @@ public:
     {
         this->BasePlaylist = UObject::FindObject<UFortPlaylistAthena>(BasePlaylist);
 
-        this->BasePlaylist->bNoDBNO = maxTeamSize > 1;
         this->bRespawnEnabled = bRespawnEnabled;
         this->bRegenEnabled = bRegenEnabled;
         this->bRejoinEnabled = bRejoinEnabled;
-        
-        /* Rejoin can be disabled for certain gamemodes only. To do this, leave the rejoin bool as false, go to the file of the gamemode you want to play (e.g. Playground), and find the line that says "AbstractGameModeBase(PlaylistName, true, 1)"
-        Change it to "AbstractGameModeBase(PlaylistName, true, 1, false, true)". Now you have rejoins enabled for Playground */
 
-        if (bRespawnEnabled)
+        // The playlist may not be loaded yet when the mode is created
+        // early (the host joins before ReadyToStartMatch). Never
+        // dereference a null playlist — the mode still works for
+        // pawn/inventory/team setup without it.
+        if (this->BasePlaylist)
         {
-            this->BasePlaylist->FriendlyFireType = EFriendlyFireType::On;
-            this->BasePlaylist->RespawnLocation = EAthenaRespawnLocation::Air;
-            this->BasePlaylist->RespawnType = EAthenaRespawnType::InfiniteRespawn;
+            this->BasePlaylist->bNoDBNO = maxTeamSize > 1;
+
+            if (bRespawnEnabled)
+            {
+                this->BasePlaylist->FriendlyFireType = EFriendlyFireType::On;
+                this->BasePlaylist->RespawnLocation = EAthenaRespawnLocation::Air;
+                this->BasePlaylist->RespawnType = EAthenaRespawnType::InfiniteRespawn;
+            }
+
+            auto GameState = static_cast<AAthena_GameState_C*>(GetWorld()->GameState);
+
+            GameState->CurrentPlaylistId = this->BasePlaylist->PlaylistId;
+            GameState->CurrentPlaylistData = this->BasePlaylist;
+
+            GameState->OnRep_CurrentPlaylistId();
+            GameState->OnRep_CurrentPlaylistData();
         }
-
-        auto GameState = static_cast<AAthena_GameState_C*>(GetWorld()->GameState);
-
-        GameState->CurrentPlaylistId = this->BasePlaylist->PlaylistId;
-        GameState->CurrentPlaylistData = this->BasePlaylist;
-
-        GameState->OnRep_CurrentPlaylistId();
-        GameState->OnRep_CurrentPlaylistData();
+        else
+        {
+            LOG_ERROR("Failed to find playlist {}! Playing without playlist data.", BasePlaylist);
+        }
 
         this->Teams = std::make_unique<PlayerTeams>(maxTeamSize);
     }

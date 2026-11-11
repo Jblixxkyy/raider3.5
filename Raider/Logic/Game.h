@@ -38,7 +38,12 @@ namespace Game
         GameMode->MatchState = InProgress;
         GameMode->K2_OnSetMatchState(InProgress);
 
-        Mode = std::make_unique<CurrentGameMode>();
+        // The host may already have created the mode when they joined
+        // (SpawnPlayActor runs before ReadyToStartMatch). Creating it a
+        // second time would destroy the first one, and its destructor
+        // calls AuthorityGameMode->ResetLevel().
+        if (!Mode)
+            Mode = std::make_unique<CurrentGameMode>();
 
         GameMode->MinRespawnDelay = 5.0f;
         GameMode->StartPlay();

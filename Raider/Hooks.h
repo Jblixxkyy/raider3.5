@@ -9,11 +9,15 @@ namespace Hooks
 {
     bool LocalPlayerSpawnPlayActor(ULocalPlayer* Player, const FString& URL, FString& OutError, UWorld* World)
     {
-        if (!bTraveled)
-        {
-            return Native::LocalPlayer::SpawnPlayActor(Player, URL, OutError, World);
-        }
-        return true;
+        // DO NOT suppress this after travel. The old code returned true
+        // without spawning once bTraveled was set, which left the host
+        // with no PlayerController in Athena: the GameMode saw 0 players,
+        // warmup expired with "All players disconnected during warmup
+        // phase" and restarted forever (CL-4000805, 2026-11-11). The local
+        // player only joins through this path — nothing makes the local
+        // client connect to the listen server via the beacon — so it must
+        // always run.
+        return Native::LocalPlayer::SpawnPlayActor(Player, URL, OutError, World);
     }
 
     void TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
@@ -68,9 +72,27 @@ namespace Hooks
     APlayerController* SpawnPlayActor(UWorld*, UPlayer* NewPlayer, ENetRole RemoteRole, FURL& URL, void* UniqueId, FString& Error, uint8 NetPlayerIndex)
     {
         auto PlayerController = static_cast<AFortPlayerControllerAthena*>(Native::World::SpawnPlayActor(GetWorld(), NewPlayer, RemoteRole, URL, UniqueId, Error, NetPlayerIndex));
+
+        if (!PlayerController)
+            return nullptr;
+
         NewPlayer->PlayerController = PlayerController;
 
-        Game::Mode->LoadJoiningPlayer(PlayerController);
+        // Only the Athena world gets the Raider join setup. The local
+        // player spawns BEFORE ReadyToStartMatch runs (spawn happens
+        // during LoadMap/BeginPlay; ReadyToStartMatch fires from
+        // StartPlay), so Game::Mode does not exist yet at that point —
+        // create it here so the host gets a pawn, inventory, abilities
+        // and a team. OnReadyToStartMatch must not create it a second
+        // time (guarded there — the mode dtor calls ResetLevel()).
+        auto GameState = GetWorld()->GameState;
+        if (GameState && GameState->IsA(AAthena_GameState_C::StaticClass()))
+        {
+            if (!Game::Mode)
+                Game::Mode = std::make_unique<CurrentGameMode>();
+
+            Game::Mode->LoadJoiningPlayer(PlayerController);
+        }
 
         PlayerController->OverriddenBackpackSize = 100;
         return PlayerController;
