@@ -6,6 +6,8 @@
 #include "Logic/Game.h"
 #include "Logic/Spawners.h"
 #include "Logic/Abilities.h"
+#include "Logic/Loot.h"
+#include "Logic/Bots.h"
 #include "UE4.h"
 
 // #define LOGGING
@@ -462,6 +464,10 @@ namespace UFunctionHooks
 
                     if (bFound)
                         Inventory::EquipInventoryItem(PC, PickaxeEntry.ItemGuid);
+
+                    // The host just jumped from the bus — drop the AI
+                    // bots into the match alongside them.
+                    Bots::SpawnBots(PC);
                 }
             }
 
@@ -510,30 +516,10 @@ namespace UFunctionHooks
                     Container->bAlreadySearched = true;
                     Container->OnRep_bAlreadySearched();
 
-                    /*
-                     * Loot Tier Groups:
-                     *  - Chests: Loot_Treasure
-                     *  - Ammo Box: Loot_Ammo
-                     */
-
-                    // auto LootTierGroup = Container->SearchLootTierGroup;
-
-                    // printf("Loot Tier: %d\n", Container->GetLootTier());
-                    // printf("Loot Tier Group: %s\n", Container->SearchLootTierGroup.ToString().c_str());
-                    // printf("Loot Tier Key: %d\n", Container->ContainerLootTierKey.ToString().c_str());
-                    // printf("Quota Loot Tier: %d\n", Container->SearchLootTierChosenQuotaInfo.LootTier);
-                    // printf("Quota Loot Tier Key: %s\n", Container->SearchLootTierChosenQuotaInfo.LootTierKey.ToString().c_str());
-
-                    // auto GameState = reinterpret_cast<AAthena_GameState_C*>(GetWorld()->GameState);
-                    // TArray<FFortItemEntry> OutDrops;
-                    // GetFortKismet()->STATIC_PickLootDrops(Container->SearchLootTierGroup, -1, 0, &OutDrops);
-
-                    // printf("Size: %d\n", OutDrops.Num());
-                    // for(int i = 0; i < OutDrops.Num(); i++)
-                    //{
-                    //     FFortItemEntry Drop = OutDrops[i];
-                    //     printf("Drop: %s\n", Drop.ItemDefinition->GetName().c_str());
-                    // }
+                    // Roll the container's loot and toss it out. (This
+                    // used to be commented out — chests opened but gave
+                    // nothing.)
+                    Loot::OnContainerSearched(Container);
                 }
             }
 

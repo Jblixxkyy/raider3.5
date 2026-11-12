@@ -46,6 +46,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>Rewind</TargetName>
     <OutDir>bin\Debug\</OutDir>
     <IntDir>obj\Debug\</IntDir>
     <IncludePath>./minhook;$(IncludePath)</IncludePath>
@@ -53,6 +54,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>Rewind</TargetName>
     <OutDir>bin\Release\</OutDir>
     <IntDir>obj\Release\</IntDir>
     <IncludePath>./minhook;$(IncludePath)</IncludePath>

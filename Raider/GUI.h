@@ -34,7 +34,7 @@ namespace GUI
 
         static auto pos = FVector2D { 200.f, 250.0f };
 
-        if (ZeroGUI::Window(L"Raider", &pos, FVector2D { 500.0f, 700.0f }, menu_opened))
+        if (ZeroGUI::Window(L"Rewind", &pos, FVector2D { 500.0f, 700.0f }, menu_opened))
         {
             if (bListening && HostBeacon)
             {

@@ -3,6 +3,7 @@
 static bool bStartedBus = false;
 
 #include "UE4.h"
+#include "Loot.h"
 #include "GameModes/GameModes.hpp"
 
 typedef GameModeSolos CurrentGameMode;
@@ -51,6 +52,9 @@ namespace Game
         GameState->bReplicatedHasBegunPlay = true;
         GameState->OnRep_ReplicatedHasBegunPlay();
         GameMode->StartMatch();
+
+        // Loot is on the ground before anyone lands.
+        Loot::SpawnFloorLoot();
     }
 
     auto GetDeathCause(FFortPlayerDeathReport DeathReport)
