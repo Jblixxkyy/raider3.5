@@ -113,7 +113,19 @@ namespace GUI
                         {
                             auto PlayerState = GameState->PlayerArray[i];
 
-                            if (ZeroGUI::Button(PlayerState->GetPlayerName().c_str(), { 100, 25 }))
+                            if (!PlayerState)
+                                continue;
+
+                            // A PlayerState with no name makes
+                            // GetPlayerName().c_str() return null (an empty
+                            // UE4 FString has a null data pointer), and the
+                            // overlay crashes drawing a button with a null
+                            // name — skip nameless players.
+                            auto PlayerName = PlayerState->GetPlayerName();
+                            if (!PlayerName.IsValid() || !*PlayerName.c_str())
+                                continue;
+
+                            if (ZeroGUI::Button(PlayerName.c_str(), { 100, 25 }))
                             {
                                 currentPlayer = PlayerState;
                             }

@@ -74,6 +74,9 @@ namespace ZeroGUI
         }
         void TextLeft(const wchar_t* name, FVector2D pos, FLinearColor color, bool outline)
         {
+            if (!name)
+                return;
+
             for (int i = 0; i < 128; i++)
             {
                 if (drawlist[i].type == -1)
@@ -89,6 +92,9 @@ namespace ZeroGUI
         }
         void TextCenter(const wchar_t* name, FVector2D pos, FLinearColor color, bool outline)
         {
+            if (!name)
+                return;
+
             for (int i = 0; i < 128; i++)
             {
                 if (drawlist[i].type == -1)
@@ -218,12 +224,18 @@ namespace ZeroGUI
 
     void TextLeft(const wchar_t* name, FVector2D pos, FLinearColor color, bool outline)
     {
+        if (!name)
+            return;
+
         static auto Font = UObject::FindObject<UFont>("Font Roboto.Roboto");
         canvas->K2_DrawText(Font, FString { name }, pos, color, false, Colors::Text_Shadow, FVector2D { pos.X + 1, pos.Y + 1 }, false, true, true, Colors::Text_Outline);
     }
 
     void TextCenter(const wchar_t* name, FVector2D pos, FLinearColor color, bool outline)
     {
+        if (!name)
+            return;
+
         static auto Font = UObject::FindObject<UFont>("Font Roboto.Roboto");
         canvas->K2_DrawText(Font, FString { name }, pos, color, false, Colors::Text_Shadow, FVector2D { pos.X + 1, pos.Y + 1 }, true, true, true, Colors::Text_Outline);
     }
